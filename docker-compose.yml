@@ -1,0 +1,63 @@
+# Define the environment variables in a .env file in the same directory as this docker-compose.yml
+# See .env_template for an example
+
+version: "3.9"
+services:
+  tailscale-tunnel:
+    image: tailscale-tunnel
+    container_name: ${TUNNEL_NAME}
+    ports:
+      - ${LOCAL_PORT}
+    environment:
+      TAILSCALE_AUTH_KEY: ${TAILSCALE_AUTH_KEY}
+      TAILSCALE_HOSTNAME: ${TUNNEL_NAME}
+      TAILSCALE_STATE_ARG: "mem:"
+      LOCAL_PORT: ${LOCAL_PORT}
+      SERVICE_HOSTNAME: ${SERVICE_HOSTNAME}
+      SERVICE_PORT: ${SERVICE_PORT}
+    restart: unless-stopped
+    
+  nginxproxymanager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    container_name: nginxproxymanager
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+      # Add any other Stream port you want to expose
+      # - '21:21' # FTP
+
+    environment:
+      TZ: 'Europe/Berlin'
+      # Uncomment this if you want to change the location of
+      # the SQLite DB file within the container
+      # DB_SQLITE_FILE: "/data/database.sqlite"
+
+      # Uncomment this if IPv6 is not enabled on your host
+      # DISABLE_IPV6: 'true'
+
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+      # Used for integration with Authelia, see below
+      # - ./snippets:/snippets:ro
+
+  # Use Authelia to protect Internet-accessible services with 2FA (Highly recommended)
+  # See https://www.authelia.com/integration/prologue/get-started/ for details
+  #  authelia:
+  #   container_name: authelia
+  #   image: authelia/authelia:latest
+  #   restart: unless-stopped
+  #   expose:
+  #     - 9091
+  #   volumes:
+  #     - ./authelia/config:/config
+  #   environment:
+  #     TZ: 'Europe/Berlin'
+
+networks:
+  default:
+    external: true
+    name: ${DOCKER_NETWORK_NAME}
