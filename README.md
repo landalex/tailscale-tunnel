@@ -1,6 +1,6 @@
-# Tailscale Tunnel in Docker (without elevated privileges)
+# Tailscale Tunnel
 
-Like your own private ngrok/Cloudflare Tunnel. Connect to services over Tailscale, isolated in a Docker network for security/convenience.
+Like your own private ngrok/Cloudflare Tunnel. Connect to services over Tailscale, isolated in a Docker container and network (without privileged access) for security/convenience.
 
 Create a Tailscale tunnel container configured to connect to some service running on another machine on your Tailscale network. Attach it to a Docker network (or the host network), and TCP traffic to the local container's specified port will be tunneled securely to the remove service via Tailscale. Use it to run a reverse proxy on a VPS that connects to the Raspberry Pi on your LAN, access services on different hosts on a Tailscale network via Docker/Docker Compose, or whatever else.
 
